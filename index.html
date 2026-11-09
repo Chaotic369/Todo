@@ -34,27 +34,27 @@
   }
   .head {
     display: flex; align-items: center; gap: 4px;
-        padding: calc(var(--rowpad) + 2px) calc(var(--pad) / 2) calc(var(--rowpad) + 2px) var(--pad);
+        padding: calc(var(--rowpad) * .5) calc(var(--pad) / 2) calc(var(--rowpad) * .5) var(--pad);
     background: rgba(0, 0, 0, calc(.72 * var(--op)));
     backdrop-filter: blur(14px) saturate(1.1);
     -webkit-backdrop-filter: blur(14px) saturate(1.1);
     border-radius: var(--radius) var(--radius) 0 0;
   }
-  .logo { width: calc(var(--fs) * 1.45); height: calc(var(--fs) * 1.45); flex: none; margin-right: 4px; }
+  
   .title-wrap { flex: 1; min-width: 0; }
   .title {
-    font-size: calc(var(--fs) * 1.1); font-weight: 700; line-height: 1.15; letter-spacing: -.2px;
+    font-size: var(--fs); font-weight: 700; line-height: 1.1; letter-spacing: -.2px;
     color: #eef2f4; background: none; border: 0; outline: 0; width: 100%;
     font-family: inherit; resize: none; display: block;
   }
   .icon-btn {
-    width: calc(var(--fs) * 1.85); height: calc(var(--fs) * 1.85); border: 0; background: transparent; color: #fff;
+    width: calc(var(--fs) * 1.5); height: calc(var(--fs) * 1.5); border: 0; background: transparent; color: #fff;
     display: grid; place-items: center; border-radius: 8px; cursor: pointer; flex: none;
     transition: background .15s, transform .15s;
   }
   .icon-btn:hover { background: rgba(255,255,255,.12); }
   .icon-btn:active { transform: scale(.92); }
-  .icon-btn svg { width: calc(var(--fs) * 1.15); height: calc(var(--fs) * 1.15); stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .icon-btn svg { width: calc(var(--fs) * 1); height: calc(var(--fs) * 1); stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .chev { width: calc(var(--fs) * .95) !important; height: calc(var(--fs) * .95) !important; opacity: .85; }
   .spin svg { animation: spin .7s ease; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -184,10 +184,7 @@
 <div class="stage">
   <div class="widget" id="widget">
     <div class="head">
-      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true">
-        <path d="M5 17.5l5.2 5.2L21 11.9" fill="none" stroke="#2564cf" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" transform="translate(0,1)"/>
-        <path d="M11.5 20.2l5.2 5.2L28 14" fill="none" stroke="#4a9bff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" transform="translate(0,-4)"/>
-      </svg>
+      
       <div class="title-wrap">
         <textarea class="title" id="title" rows="2" spellcheck="false">To complete till my 20th birthday</textarea>
       </div>
