@@ -87,6 +87,15 @@
   .check svg { width: calc(var(--fs) * .65); height: calc(var(--fs) * .65); stroke: #fff; stroke-width: 3; fill: none; opacity: 0; stroke-linecap: round; stroke-linejoin: round; }
   .item.done .check { background: #3b8bf0; border-color: #3b8bf0; }
   .item.done .check svg { opacity: 1; }
+    .item .body { flex: 1; min-width: 0; }
+    .item .body .text { display: block; flex: none; font-weight: 700; }
+    .meta { display: flex; align-items: center; gap: 4px; margin-top: 2px; font-size: calc(var(--fs) * .8); font-weight: 600; color: rgba(210, 218, 222, .55); white-space: nowrap; overflow: hidden; }
+    .meta span { display: inline-flex; align-items: center; gap: 3px; }
+    .meta svg { width: 1.1em; height: 1.1em; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .meta i { font-style: normal; opacity: .7; }
+    .meta .od { color: #ff6b6b; }
+    .item.done .meta { opacity: .5; }
+    .head > .logo { flex: none; display: grid; width: calc(var(--fs) * 1.5); height: calc(var(--fs) * 1.5); margin-right: 6px; }
     .when { flex: none; font-size: calc(var(--fs) * .8); font-weight: 700; color: #7fb4ff; }
     .item.done .when { opacity: .4; text-decoration: line-through; }
     .icon-btn.on svg { stroke: #5aa2ff; }
@@ -478,11 +487,35 @@ tmBox.onclick = e => {
 };
 tmIn.addEventListener('input', tmUpdate);
 tmIn.addEventListener('scroll', () => { tmHl.scrollLeft = tmIn.scrollLeft; });
+const dayStr = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+function metaHTML(t) {
+  const today = dayStr(new Date()), d = t.date || today, over = d < today;
+  const ic = p => '<svg viewBox="0 0 24 24">' + p + '</svg>';
+  const sun = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+  const cal = '<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16"/>';
+  const bell = '<path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>';
+  let label = 'Today';
+  if (d !== today) {
+    const p = d.split('-').map(Number), dt = new Date(p[0], p[1] - 1, p[2]);
+    label = dt.toLocaleDateString('en-US', { weekday: 'short' }) + ', ' + dt.getDate() + ' ' + dt.toLocaleDateString('en-US', { month: 'short' }) + ' ' + dt.getFullYear();
+  }
+  return (d === today ? '<span>' + ic(sun) + 'My Day</span><i>·</i>' : '')
+    + '<span class="' + (over ? 'od' : '') + '">' + ic(cal) + label + '</span>'
+    + (t.time ? '<i>·</i><span>' + ic(bell) + fmtT(t.time) + '</span>' : '');
+}
+(function () {
+  const logo = document.createElement('span');
+  logo.className = 'logo';
+  logo.innerHTML = '<svg viewBox="0 0 24 24" width="100%" height="100%"><path d="M3 13l5 5L21 5" fill="none" stroke="#3b8bf0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const head = document.querySelector('.head');
+  if (head) head.prepend(logo);
+  $('title').rows = 1;
+})();
 function autoTime() {
   let ch = false;
   tasks.forEach(t => {
     if (t._p) return;
-    t._p = true; ch = true;
+    t._p = true; ch = true; t.date = dayStr(new Date());
     const m = tparse(t.text || '');
     if (m && !m.ask) {
       const rest = (t.text.slice(0, m.i) + t.text.slice(m.i + m.text.length)).replace(/\s+/g, ' ').trim();
@@ -530,6 +563,10 @@ function render() {
       <button class="del" title="Delete">✕</button>
       <button class="star" aria-label="Star">${starSVG}</button>`;
     const txt = li.querySelector('.text'); txt.textContent = t.text;
+        const wh = li.querySelector('.when'); if (wh) wh.remove();
+        const body = document.createElement('div'), meta = document.createElement('div');
+        body.className = 'body'; meta.className = 'meta'; meta.innerHTML = metaHTML(t);
+        txt.before(body); body.append(txt, meta);
     li.querySelector('.check').onclick = () => { t.done = !t.done; save(); render(); };
     li.querySelector('.star').onclick = () => { t.star = !t.star; save(); render(); };
     li.querySelector('.del').onclick = () => { tasks = tasks.filter(x => x !== t); save(); render(); };
