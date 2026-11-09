@@ -36,8 +36,8 @@
       display: flex; align-items: center; gap: 4px;
         padding: calc(var(--rowpad) * .5) calc(var(--pad) / 2) calc(var(--rowpad) * .5) var(--pad);
     background: rgba(0, 0, 0, calc(.72 * var(--op)));
-    backdrop-filter: blur(14px) saturate(1.1);
-    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    backdrop-filter: blur(calc(14px * var(--op))) saturate(1.1);
+        -webkit-backdrop-filter: blur(calc(14px * var(--op))) saturate(1.1);
     border-radius: var(--radius) var(--radius) 0 0;
   }
   
@@ -62,8 +62,8 @@
   .list {
     list-style: none;
     background: rgba(0, 0, 0, calc(.42 * var(--op)));
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(calc(10px * var(--op)));
+        -webkit-backdrop-filter: blur(calc(10px * var(--op)));
     border-radius: 0 0 var(--radius) var(--radius);
     padding: 0 var(--pad) 2px;
     height: var(--lh); overflow-y: auto;
@@ -72,11 +72,11 @@
   .item {
     display: flex; align-items: center; gap: calc(var(--fs) * .75);
         padding: var(--rowpad) 0;
-        border-bottom: 1px solid rgba(20, 22, 24, .55);
+        border-bottom: 1px solid rgba(20, 22, 24, calc(.55 * var(--op)));
     animation: pop .25s ease;
   }
   @keyframes pop { from { opacity: 0; transform: translateY(-6px); } }
-  .item:last-child { border-bottom-color: rgba(20,22,24,.55); }
+  .item:last-child { border-bottom-color: rgba(20,22,24,calc(.55 * var(--op))); }
   .check {
     width: calc(var(--fs) * 1.05); height: calc(var(--fs) * 1.05); flex: none; border-radius: 50%;
         border: 1.5px solid rgba(220, 228, 232, .55); background: transparent; cursor: pointer;
@@ -445,7 +445,7 @@ const CFG_FIELDS = [
   ['pad', 'Side padding', 4, 36, 'px'],
   ['rowpad', 'Row spacing', 3, 24, 'px'],
   ['radius', 'Corners', 0, 32, 'px'],
-  ['op', 'Opacity', 20, 140, '%']
+  ['op', 'Opacity', 0, 140, '%']
 ];
 const cfg = Object.assign({}, CFG_DEFAULT, store.get('wcfg', {}));
 const sliderEls = {};
