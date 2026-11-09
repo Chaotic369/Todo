@@ -95,7 +95,7 @@
     .meta i { font-style: normal; opacity: .7; }
     .meta .od { color: #ff6b6b; }
     .item.done .meta { opacity: .5; }
-    .head > .logo { flex: none; display: grid; width: calc(var(--fs) * 1.5); height: calc(var(--fs) * 1.5); margin-right: 6px; }
+    
     .when { flex: none; font-size: calc(var(--fs) * .8); font-weight: 700; color: #7fb4ff; }
     .item.done .when { opacity: .4; text-decoration: line-through; }
     .icon-btn.on svg { stroke: #5aa2ff; }
@@ -207,7 +207,6 @@
 <div class="stage">
   <div class="widget" id="widget">
     <div class="head">
-      
       <div class="title-wrap">
         <textarea class="title" id="title" rows="2" spellcheck="false">To complete till my 20th birthday</textarea>
       </div>
@@ -503,14 +502,7 @@ function metaHTML(t) {
     + '<span class="' + (over ? 'od' : '') + '">' + ic(cal) + label + '</span>'
     + (t.time ? '<i>·</i><span>' + ic(bell) + fmtT(t.time) + '</span>' : '');
 }
-(function () {
-  const logo = document.createElement('span');
-  logo.className = 'logo';
-  logo.innerHTML = '<svg viewBox="0 0 24 24" width="100%" height="100%"><path d="M3 13l5 5L21 5" fill="none" stroke="#3b8bf0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  const head = document.querySelector('.head');
-  if (head) head.prepend(logo);
-  $('title').rows = 1;
-})();
+$('title').rows = 1;
 function autoTime() {
   let ch = false;
   tasks.forEach(t => {
