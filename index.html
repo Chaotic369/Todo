@@ -87,6 +87,19 @@
   .check svg { width: calc(var(--fs) * .65); height: calc(var(--fs) * .65); stroke: #fff; stroke-width: 3; fill: none; opacity: 0; stroke-linecap: round; stroke-linejoin: round; }
   .item.done .check { background: #3b8bf0; border-color: #3b8bf0; }
   .item.done .check svg { opacity: 1; }
+    .when { flex: none; font-size: calc(var(--fs) * .8); font-weight: 700; color: #7fb4ff; }
+    .item.done .when { opacity: .4; text-decoration: line-through; }
+    .icon-btn.on svg { stroke: #5aa2ff; }
+    #remBtn:not(.on) svg { opacity: .5; }
+    .hl { position: relative; flex: 1; min-width: 0; }
+    .add-row .hl input { position: relative; width: 100%; padding: 0; color: transparent; caret-color: #fff; }
+    .th { position: absolute; inset: 0; white-space: pre; overflow: hidden; pointer-events: none; color: #fff; font-size: var(--fs); font-weight: 600; line-height: 1.2; letter-spacing: -.1px; font-family: inherit; }
+    .th mark { background: none; color: #7fb4ff; }
+    .tp { list-style: none; display: flex; align-items: center; gap: 6px; padding: calc(var(--rowpad) * .6) 0; font-size: calc(var(--fs) * .85); color: #cfd8dc; border-bottom: 1px solid rgba(20, 22, 24, calc(.55 * var(--op))); }
+    .tp[hidden], .add-row:not(.show) + .tp { display: none; }
+    .tp span { flex: 1; min-width: 0; }
+    .tp button { border: 0; border-radius: 999px; padding: 2px 9px; background: rgba(255,255,255,.16); color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+    .tp button.x { background: none; opacity: .6; padding: 2px 4px; }
   .text {
     flex: 1; font-size: var(--fs); font-weight: 600; letter-spacing: -.1px; color: #e6ebee;
     line-height: 1.2; word-break: break-word; outline: 0; cursor: text;
@@ -191,13 +204,14 @@
       </div>
       <button class="icon-btn" title="Switch list" id="chevBtn"><svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
       <button class="icon-btn" title="Refresh" id="refreshBtn"><svg viewBox="0 0 24 24" style="stroke-width:2.6"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 3.5v5h-5" fill="currentColor"/></svg></button>
-      <button class="icon-btn" title="Add task" id="addBtn"><svg viewBox="0 0 24 24" style="stroke-width:2.2"><path d="M12 4v16M4 12h16"/></svg></button>
+      <button class="icon-btn" title="Reminders" id="remBtn"><svg viewBox="0 0 24 24" style="stroke-width:2"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
+            <button class="icon-btn" title="Add task" id="addBtn"><svg viewBox="0 0 24 24" style="stroke-width:2.2"><path d="M12 4v16M4 12h16"/></svg></button>
       <button class="icon-btn" title="Settings" id="setBtn"><svg viewBox="0 0 24 24" style="stroke-width:1.9"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
     </div>
     <ul class="list" id="list">
       <li class="add-row" id="addRow">
         <span class="check"></span>
-        <input id="newInput" placeholder="Add a task…" maxlength="120">
+        <div class="hl"><div class="th" id="th" aria-hidden="true"></div><input id="newInput" placeholder="Add a task…" maxlength="120"></div>
       </li>
     </ul>
       </div>
@@ -395,21 +409,124 @@ const defaults = [
   { id: 3, text: '30 min meditation habit', done: false, star: false }
 ];
 let tasks = store.get('tasks', defaults);
+tasks.forEach(t => { t._p = true; });
 $('title').value = store.get('title', 'To complete till my 20th birthday');
 
 const starSVG = '<svg viewBox="0 0 24 24"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1L3.2 9.6l6.1-.8z"/></svg>';
 const checkSVG = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 
 function save() { store.set('tasks', tasks); }
+
+/* ---------- auto time detection ---------- */
+let tmOff = '';
+const tmIn = $('newInput'), tmHl = $('th');
+const tmBox = document.createElement('li');
+tmBox.className = 'tp'; tmBox.id = 'tp'; tmBox.hidden = true;
+$('addRow').after(tmBox);
+const escT = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function fmtT(hm) { const p = hm.split(':').map(Number), h = p[0] || 0, m = p[1] || 0; return ((h % 12) || 12) + ':' + String(m).padStart(2, '0') + ' ' + (h < 12 ? 'AM' : 'PM'); }
+function tparse(s) {
+  const P = (h, m, p) => ({ h: +h, m: +(m || 0), p: (p || '').toLowerCase() });
+  const N = x => ((x.h % 12) + (x.p === 'pm' ? 12 : 0)) * 60 + x.m;
+  const F = n => String(Math.floor(n / 60)).padStart(2, '0') + ':' + String(n % 60).padStart(2, '0');
+  const O = x => x.p === 'am' ? 'pm' : 'am';
+  let m = s.match(/(?<![\d:])(\d{1,2})(?::([0-5]\d))?\s*(am|pm)?\s*(?:-|–|—|to)\s*(\d{1,2})(?::([0-5]\d))?\s*(am|pm)?(?![\d:])/i);
+  if (m) {
+    const a = P(m[1], m[2], m[3]), b = P(m[4], m[5], m[6]);
+    const ok = a.h <= 23 && b.h <= 23 && (!(a.p || b.p) || (a.h >= 1 && a.h <= 12 && b.h >= 1 && b.h <= 12));
+    if (ok) {
+      const r = { text: m[0], i: m.index };
+      const c24 = !a.p && !b.p && (a.h > 12 || b.h > 12 || m[1][0] === '0' || m[4][0] === '0');
+      let s1;
+      if (c24) { s1 = a.h * 60 + a.m; }
+      else {
+        if (!a.p && !b.p) return { ...r, ask: true };
+        if (!b.p) { b.p = a.p; if (N(b) <= N(a)) b.p = O(a); }
+        else if (!a.p) { a.p = b.p; if (N(a) >= N(b)) a.p = O(b); }
+        s1 = N(a);
+      }
+      return { ...r, ask: false, time: F(s1) };
+    }
+  }
+  m = s.match(/(?<![\d:])(\d{1,2})(?::([0-5]\d))?\s*(am|pm)\b/i);
+  if (m && +m[1] >= 1 && +m[1] <= 12) { const x = P(m[1], m[2], m[3]); return { text: m[0], i: m.index, ask: false, time: F(N(x)) }; }
+  m = s.match(/(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/);
+  if (m) return { text: m[0], i: m.index, ask: false, time: F(+m[1] * 60 + +m[2]) };
+  m = s.match(/(?<![\d:#!.\w-])(\d{1,2})(?![\d:.]|\s*(?:xp|%|min|kg|[-–—]|to\b|am|pm))/i);
+  if (m && +m[1] >= 1 && +m[1] <= 12) return { text: m[0], i: m.index, ask: true, bare: true };
+  return null;
+}
+function tmUpdate() {
+  const v = tmIn.value, m = tparse(v);
+  if (!m || !m.ask) tmOff = '';
+  const hm = m && !(m.ask && m.text === tmOff) ? m : null;
+  tmHl.innerHTML = hm ? escT(v.slice(0, hm.i)) + '<mark>' + escT(hm.text) + '</mark>' + escT(v.slice(hm.i + hm.text.length)) : escT(v);
+  tmHl.scrollLeft = tmIn.scrollLeft;
+  const show = !!m && m.ask && m.text !== tmOff && $('addRow').classList.contains('show');
+  tmBox.hidden = !show;
+  if (show) tmBox.innerHTML = '<span>' + escT(m.text) + ' · ' + (m.bare ? 'a time?' : 'AM or PM?') + '</span><button data-p="am">AM</button><button data-p="pm">PM</button><button class="x" aria-label="Not a time">✕</button>';
+}
+tmBox.onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const m = tparse(tmIn.value); if (!m || !m.ask) return;
+  if (b.dataset.p) {
+    const end = m.i + m.text.length;
+    tmIn.value = tmIn.value.slice(0, end) + b.dataset.p + tmIn.value.slice(end);
+    tmIn.focus(); tmIn.setSelectionRange(end + 2, end + 2);
+  } else { tmOff = m.text; tmIn.focus(); }
+  tmUpdate();
+};
+tmIn.addEventListener('input', tmUpdate);
+tmIn.addEventListener('scroll', () => { tmHl.scrollLeft = tmIn.scrollLeft; });
+function autoTime() {
+  let ch = false;
+  tasks.forEach(t => {
+    if (t._p) return;
+    t._p = true; ch = true;
+    const m = tparse(t.text || '');
+    if (m && !m.ask) {
+      const rest = (t.text.slice(0, m.i) + t.text.slice(m.i + m.text.length)).replace(/\s+/g, ' ').trim();
+      if (rest) { t.time = m.time; t.text = rest; }
+    }
+  });
+  if (ch) save();
+}
+
+/* ---------- reminders ---------- */
+let remOn = store.get('remind', false) === true;
+const remSeen = new Set();
+$('remBtn').classList.toggle('on', remOn);
+$('remBtn').onclick = e => {
+  e.stopPropagation();
+  remOn = !remOn; store.set('remind', remOn); $('remBtn').classList.toggle('on', remOn);
+  if (!remOn) return toast('Reminders off');
+  if (window.Notification && Notification.permission === 'default') {
+    try { Notification.requestPermission().then(p => toast(p === 'granted' ? 'Reminders on' : 'Reminders on (in-app only)')).catch(() => toast('Reminders on (in-app only)')); }
+    catch (err) { toast('Reminders on (in-app only)'); }
+  } else toast(window.Notification && Notification.permission === 'granted' ? 'Reminders on' : 'Reminders on (in-app only)');
+};
+setInterval(() => {
+  if (!remOn) return;
+  const n = new Date(), hm = String(n.getHours()).padStart(2, '0') + ':' + String(n.getMinutes()).padStart(2, '0'), day = n.toDateString();
+  tasks.forEach(t => {
+    const key = day + '|' + hm + '|' + t.text;
+    if (t.done || t.time !== hm || remSeen.has(key)) return;
+    remSeen.add(key);
+    toast('⏰ ' + t.text);
+    try { if (window.Notification && Notification.permission === 'granted') new Notification(t.text, { body: fmtT(hm) }); } catch (err) {}
+  });
+}, 20000);
 function render() {
   const list = $('list');
   list.querySelectorAll('.item, .empty').forEach(n => n.remove());
+    autoTime(); setTimeout(tmUpdate, 0);
   if (!tasks.length) { const e = document.createElement('li'); e.className = 'empty'; e.textContent = 'Nothing here yet — tap + to add a task'; list.appendChild(e); }
   tasks.forEach(t => {
     const li = document.createElement('li');
     li.className = 'item' + (t.done ? ' done' : '') + (t.star ? ' starred' : '');
     li.innerHTML = `<button class="check" aria-label="Complete">${checkSVG}</button>
       <span class="text" contenteditable="true" spellcheck="false"></span>
+            ${t.time ? '<span class="when">' + fmtT(t.time) + '</span>' : ''}
       <button class="del" title="Delete">✕</button>
       <button class="star" aria-label="Star">${starSVG}</button>`;
     const txt = li.querySelector('.text'); txt.textContent = t.text;
