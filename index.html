@@ -78,12 +78,12 @@
   @keyframes pop { from { opacity: 0; transform: translateY(-6px); } }
   .item:last-child { border-bottom-color: rgba(20,22,24,.55); }
   .check {
-    width: calc(var(--fs) * 1.4); height: calc(var(--fs) * 1.4); flex: none; border-radius: 50%;
-    border: 2px solid rgba(220, 228, 232, .55); background: transparent; cursor: pointer;
+    width: calc(var(--fs) * 1.05); height: calc(var(--fs) * 1.05); flex: none; border-radius: 50%;
+        border: 1.5px solid rgba(220, 228, 232, .55); background: transparent; cursor: pointer;
     display: grid; place-items: center; transition: all .18s;
   }
   .check:hover { border-color: #fff; }
-  .check svg { width: calc(var(--fs) * .8); height: calc(var(--fs) * .8); stroke: #fff; stroke-width: 3; fill: none; opacity: 0; stroke-linecap: round; stroke-linejoin: round; }
+  .check svg { width: calc(var(--fs) * .65); height: calc(var(--fs) * .65); stroke: #fff; stroke-width: 3; fill: none; opacity: 0; stroke-linecap: round; stroke-linejoin: round; }
   .item.done .check { background: #3b8bf0; border-color: #3b8bf0; }
   .item.done .check svg { opacity: 1; }
   .text {
@@ -92,7 +92,7 @@
   }
   .item.done .text { text-decoration: line-through; opacity: .5; }
   .star {
-    width: calc(var(--fs) * 1.6); height: calc(var(--fs) * 1.6); border: 0; background: transparent; cursor: pointer; flex: none;
+    width: calc(var(--fs) * 1.3); height: calc(var(--fs) * 1.3); border: 0; background: transparent; cursor: pointer; flex: none;
     display: grid; place-items: center; color: rgba(210, 218, 222, .6); transition: transform .15s, color .15s;
   }
   .star:hover { transform: scale(1.15); color: #fff; }
@@ -437,11 +437,11 @@ $('title').oninput = e => store.set('title', e.target.value);
 $('title').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } };
 
 /* ---------- widget layout controls ---------- */
-const CFG_DEFAULT = { w: 340, h: 150, fs: 14, pad: 14, rowpad: 10, radius: 14, op: 100 };
+const CFG_DEFAULT = { w: 240, h: 110, fs: 12, pad: 10, rowpad: 6, radius: 10, op: 100 };
 const CFG_FIELDS = [
-  ['w', 'Width', 200, 600, 'px'],
+  ['w', 'Width', 140, 600, 'px'],
   ['h', 'List height', 60, 700, 'px'],
-  ['fs', 'Text size', 10, 24, 'px'],
+  ['fs', 'Text size', 8, 24, 'px'],
   ['pad', 'Side padding', 4, 36, 'px'],
   ['rowpad', 'Row spacing', 3, 24, 'px'],
   ['radius', 'Corners', 0, 32, 'px'],
