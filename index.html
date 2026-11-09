@@ -34,7 +34,6 @@
   }
   .head {
       display: flex; align-items: center; gap: 4px;
-      cursor: grab; touch-action: none;
         padding: calc(var(--rowpad) * .5) calc(var(--pad) / 2) calc(var(--rowpad) * .5) var(--pad);
     background: rgba(0, 0, 0, calc(.72 * var(--op)));
     backdrop-filter: blur(14px) saturate(1.1);
@@ -200,7 +199,6 @@
         <input id="newInput" placeholder="Add a task…" maxlength="120">
       </li>
     </ul>
-        <div class="grip" id="grip" title="Drag to resize"></div>
       </div>
     </div>
 
@@ -474,32 +472,59 @@ function applyCfg() {
   });
 }
 $('cfgReset').onclick = () => { Object.assign(cfg, CFG_DEFAULT); applyCfg(); store.set('wcfg', cfg); toast('Layout reset'); };
-$('grip').onpointerdown = e => {
-  e.preventDefault();
-  const g = $('grip'); g.setPointerCapture(e.pointerId);
-  const x0 = e.clientX, y0 = e.clientY, w0 = cfg.w, h0 = cfg.h;
-  g.onpointermove = ev => {
-    cfg.w = Math.max(200, Math.min(600, Math.round(w0 + (ev.clientX - x0) * 2)));
-    cfg.h = Math.max(60, Math.min(700, Math.round(h0 + (ev.clientY - y0))));
-    applyCfg();
-  };
-  g.onpointerup = () => { g.onpointermove = g.onpointerup = null; store.set('wcfg', cfg); };
-  };
-  (function () {
-    const w = $('widget'), h = w.querySelector('.head');
-    let px = 0, py = 0;
-    h.onpointerdown = e => {
-      if (e.target.closest('button, textarea')) return;
-      e.preventDefault();
-      h.setPointerCapture(e.pointerId);
-      const x0 = e.clientX - px, y0 = e.clientY - py;
-      h.onpointermove = ev => {
-        px = ev.clientX - x0; py = ev.clientY - y0;
-        w.style.transform = 'translate(' + px + 'px,' + py + 'px)';
-      };
-      h.onpointerup = () => { h.onpointermove = h.onpointerup = null; };
-    };
-  })();
+(function () {
+  const w = $('widget');
+  let px = 0, py = 0, ox = 0, oy = 0, sx = 0, sy = 0;
+  let minX = 0, maxX = 0, minY = 0, maxY = 0;
+  let drag = false, timer = null;
+  function place() { w.style.transform = 'translate(' + px + 'px,' + py + 'px)' + (drag ? ' scale(1.03)' : ''); }
+  function bounds() {
+    const r = w.getBoundingClientRect(), l0 = r.left - px, t0 = r.top - py;
+    minX = -l0; maxX = window.innerWidth - r.width - l0;
+    minY = -t0; maxY = window.innerHeight - r.height - t0;
+  }
+  function clamp() { bounds(); px = Math.max(minX, Math.min(maxX, px)); py = Math.max(minY, Math.min(maxY, py)); }
+  function cancel() { clearTimeout(timer); timer = null; }
+  function end() {
+    cancel();
+    if (!drag) return;
+    drag = false;
+    w.style.cursor = ''; w.style.userSelect = '';
+    place();
+    store.set('wpos', { x: px, y: py });
+  }
+  w.addEventListener('pointerdown', e => {
+    if (e.button > 0 || e.target.closest('button, input, textarea, .check, .star, .del')) return;
+    sx = e.clientX; sy = e.clientY; ox = px; oy = py;
+    const id = e.pointerId;
+    cancel();
+    timer = setTimeout(() => {
+      timer = null;
+      bounds();
+      drag = true;
+      try { w.setPointerCapture(id); } catch (err) {}
+      w.style.cursor = 'grabbing'; w.style.userSelect = 'none';
+      if (navigator.vibrate) navigator.vibrate(15);
+      place();
+    }, 400);
+  });
+  w.addEventListener('pointermove', e => {
+    if (timer && Math.hypot(e.clientX - sx, e.clientY - sy) > 8) cancel();
+    if (!drag) return;
+    px = Math.max(minX, Math.min(maxX, ox + e.clientX - sx));
+    py = Math.max(minY, Math.min(maxY, oy + e.clientY - sy));
+    place();
+  });
+  w.addEventListener('pointerup', end);
+  w.addEventListener('pointercancel', end);
+  w.addEventListener('touchmove', e => { if (drag) e.preventDefault(); }, { passive: false });
+  w.addEventListener('contextmenu', e => { if (drag || timer) e.preventDefault(); });
+  window.addEventListener('resize', () => { clamp(); place(); });
+  requestAnimationFrame(() => {
+    const saved = store.get('wpos', null);
+    if (saved) { px = saved.x || 0; py = saved.y || 0; clamp(); place(); }
+  });
+})();
 applyCfg();
 
 render();
